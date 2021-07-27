@@ -10,7 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+# Py
 from pathlib import Path
+# 3rd party
+from decouple import config
+# Internal
+from . import service
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,9 +28,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-vlamt)-*p()+ot^3=6fe_n18fb#05h_sbu11n#!3=jtp*o&57!'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -75,8 +80,12 @@ WSGI_APPLICATION = 'technicalTest.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME':     config('DATABASE_NAME'),
+        'USER':     config('DATABASE_USER'),
+        'PASSWORD': config('DATABASE_PASSWORD'),
+        'HOST':     config('DATABASE_HOST'),
+        'PORT':     config('DATABASE_PORT'),
     }
 }
 
@@ -123,3 +132,15 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+"""
+Dynamically adds modules to INSTALLED_APPS
+"""
+
+for item in service.get_installed_modules_to_add_to_installed_apps():
+    toAdd = f"{item.replace('_', ' ')} config"
+    toAdd = toAdd.title()
+    toAdd = toAdd.replace(' ', '')
+    toAdd = f'{item}.apps.{toAdd}'
+    INSTALLED_APPS.append(toAdd)
+    print(f'Dynamically adding module: {toAdd}')
