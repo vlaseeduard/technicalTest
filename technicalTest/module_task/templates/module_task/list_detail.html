@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Todo List: {{ task_list.name }}{% endblock %}
+
+{% block content %}
+
+{% if list_slug != "mine" %}
+<button class="btn btn-primary" id="AddTaskButton" type="button"
+        data-toggle="collapse" data-target="#AddEditTask">Add Task</button>
+
+{# Task edit / new task form #}
+<div id="AddEditTask" class="collapse">
+    {% include 'module_task/include/task_edit.html' %}
+</div>
+<hr />
+{% endif %}
+
+{% if tasks %}
+{% if list_slug == "mine" %}
+<h1>Tasks assigned to me (in all groups)</h1>
+{% else %}
+<h1>{{ view_completed|yesno:"Completed tasks, Tasks" }} in "{{ task_list.name }}"</h1>
+<p><small><i>In workgroup "{{ task_list.group }}" - drag rows to set priorities.</i></small></p>
+{% endif %}
+
+<table class="table" id="tasktable">
+    <tr class="nodrop">
+        <th>Task</th>
+        <th>Created</th>
+        <th>Due on</th>
+        <th>Owner</th>
+        <th>Assigned</th>
+        <th>Mark</th>
+    </tr>
+
+    {% for task in tasks %}
+    <tr id="{{ task.id }}">
+        <td>
+            <a href="{% url 'module_task:task_detail' task.id %}">{{ task.title|truncatewords:10 }}</a>
+        </td>
+        <td>
+            {{ task.created_date|date:"m/d/Y" }}
+        </td>
+        <td>
+              <span {% if task.overdue_status %}class="overdue"{% endif %}>
+                {{ task.due_date|date:"m/d/Y" }}
+              </span>
+        </td>
+        <td>
+            {{ task.created_by }}
+        </td>
+        <td>
+            {% if task.assigned_to %}{{ task.assigned_to }}{% else %}Anyone{% endif %}
+        </td>
+        <td>
+            <form method="post" action="{% url 'module_task:task_toggle_done' task.id %}" role="form">
+                {% csrf_token %}
+                <button class="btn btn-info btn-sm" type="submit" name="toggle_done">
+                    {% if view_completed %}
+                    Not Done
+                    {% else %}
+                    Done
+                    {% endif %}
+                </button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% include 'module_task/include/toggle_delete.html' %}
+
+{% else %}
+<h4>No tasks on this list yet (add one!)</h4>
+{% include 'module_task/include/toggle_delete.html' %}
+
+{% endif %}
+
+{% endblock %}
+
+
