@@ -32,6 +32,9 @@ DEBUG = config("DEBUG", cast=bool)
 
 ALLOWED_HOSTS = ['*']
 
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = '/user/login/'
 
 # Application definition
 
@@ -132,6 +135,31 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "root": {
+        "level": "DEBUG",
+        "handlers": ["console"],
+        "formatter": "verbose",
+    },
+    "formatters": {
+        "verbose": {
+            "format": (
+                "%(asctime)s %(levelname)s %(name)s %(message)s [PID:%(process)d:%(threadName)s]"
+            )
+        },
+        "simple": {"format": "%(levelname)s %(message)s"},
+    },
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    }
+}
 
 """
 Dynamically adds modules to INSTALLED_APPS
