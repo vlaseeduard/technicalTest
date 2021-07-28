@@ -29,4 +29,3 @@ def toggle_task_completed(task_id: int) -> bool:
         task_logger.info(f"Task {task_id} not found.")
         return False
 
-
