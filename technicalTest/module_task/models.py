@@ -1,6 +1,7 @@
 # py
 import datetime
-
+#
+from .service import WeatherWrapper
 # django
 from django.conf import settings
 from django.contrib.auth.models import Group
@@ -31,6 +32,9 @@ class Task(models.Model):
     due_date = models.DateField(blank=True, null=True)
     completed = models.BooleanField(default=False)
     completed_date = models.DateField(blank=True, null=True)
+    location = models.CharField(max_length=254)
+
+    latest_temp = models.FloatField(null=True, blank=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
@@ -65,6 +69,9 @@ class Task(models.Model):
         # If Task is being marked complete, set the completed_date
         if self.completed:
             self.completed_date = datetime.datetime.now()
+            self.latest_temp = WeatherWrapper().get_city_weather(str(self.location)).feels_like
+        else:
+            self.latest_temp = None
         super(Task, self).save()
 
     class Meta:

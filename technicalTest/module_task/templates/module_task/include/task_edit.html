@@ -64,7 +64,6 @@
     </div>
 </form>
 
-
 <script>
     function add_cities(){
         if(document.getElementById('city-selection')){
@@ -77,7 +76,7 @@
         for (let index = 0; index < countriesList.length; index ++){citiesOptions += `<option >${countriesList[index]}</option>`;}
 
         document.getElementById('countries-selection').innerHTML += `
-        <select id="city-selection" onchange="get_weather()">
+        <select id="city-selection" onchange="get_weather()" name="location">
             <option >Select city</option>
             ${citiesOptions}
         </select>
@@ -139,35 +138,5 @@
 
 
     }
-
-
-    function do_action_request(endpoint, method, data, csrf_token){
-        /*
-        * @param {String} endpoint - The input id
-        * @param {String} method - http method used for ajax request
-        * @param {String} data - The data sent to the server.
-        * @param {String} csrf_token - csrf token
-        */
-        return $.ajax({
-                type: method,
-                data: data,
-                async: false,
-                cache: false,
-                dataType: 'json',
-                beforeSend: function(xhr){
-                    xhr.setRequestHeader("X-CSRFToken", csrf_token);
-                },
-                url: endpoint,
-                contentType: "application/json; charset=utf-8",
-                processData : false,
-                success: function(response) {
-                    console.log(response);
-                },
-                error: function(xhr, ajaxOptions, thrownError) {
-                    console.error(xhr.status + ": " + xhr.responseText);
-                }
-        }).responseJSON.data;
-
-    }
-
 </script>
+

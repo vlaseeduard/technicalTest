@@ -44,13 +44,17 @@ class WeatherWrapper(object):
     ENDPOINT = 'https://api.openweathermap.org/data/2.5/weather'
 
     def get_city_weather(self, city_name: str):
-        json_resp = json.loads(requests.get(f"{self.ENDPOINT}?q={city_name}&appid={self.API_KEY}").text)
-        return WeatherData(
-            country=json_resp['sys']['country'],
-            city_name=json_resp['name'],
-            weather_main=json_resp['weather'][0]['main'],
-            weather_description=json_resp['weather'][0]['description'],
-            temp_min=round(float(json_resp['main']['temp_min']) - 273.15, 2),
-            temp_max=round(float(json_resp['main']['temp_max']) - 273.15, 2),
-            feels_like=round(float(json_resp['main']['feels_like']) - 273.15, 2),
-        )
+        try:
+            json_resp = json.loads(requests.get(f"{self.ENDPOINT}?q={city_name}&appid={self.API_KEY}").text)
+            return WeatherData(
+                country=json_resp['sys']['country'],
+                city_name=json_resp['name'],
+                weather_main=json_resp['weather'][0]['main'],
+                weather_description=json_resp['weather'][0]['description'],
+                temp_min=round(float(json_resp['main']['temp_min']) - 273.15, 2),
+                temp_max=round(float(json_resp['main']['temp_max']) - 273.15, 2),
+                feels_like=round(float(json_resp['main']['feels_like']) - 273.15, 2),
+            )
+        except Exception as err:
+            #todo add logger
+            return None

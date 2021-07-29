@@ -29,6 +29,8 @@
         <th>Task</th>
         <th>Created</th>
         <th>Due on</th>
+        <th>Location</th>
+        <th>Latest temperature</th>
         <th>Owner</th>
         <th>Assigned</th>
         <th>Mark</th>
@@ -46,6 +48,12 @@
               <span {% if task.overdue_status %}class="overdue"{% endif %}>
                 {{ task.due_date|date:"m/d/Y" }}
               </span>
+        </td>
+        <td>
+            {{ task.location }}
+        </td>
+        <td>
+            {{ task.latest_temp }}
         </td>
         <td>
             {{ task.created_by }}

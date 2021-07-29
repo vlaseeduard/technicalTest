@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from ..forms import AddEditTaskForm
 from ..models import Task, TaskList
 from ..utils import staff_check
-from ..service import CountriesWrapper
+from ..service import CountriesWrapper, WeatherWrapper
 
 @login_required
 @user_passes_test(staff_check)
@@ -68,6 +68,12 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False) -> 
             request.user,
             initial={"assigned_to": request.user.id, "priority": 999, "task_list": task_list},
         )
+
+    for task in tasks:
+        if task.latest_temp is None:
+            latest_temp = WeatherWrapper().get_city_weather(city_name=task.location)
+            if latest_temp is not None:
+                task.latest_temp = WeatherWrapper().get_city_weather(city_name=task.location).feels_like
 
     return render(request, "module_task/list_detail.html", {
         "list_id": list_id,
