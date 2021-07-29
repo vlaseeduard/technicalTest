@@ -4,7 +4,9 @@ from collections import namedtuple
 # 3rd party
 import requests
 
-WeatherData = namedtuple('WeatherData', 'country city_name weather_main weather_description')
+WeatherData = namedtuple('WeatherData', 'country city_name weather_main weather_description temp_min temp_max feels_like')
+
+ALL_COUNTRIES = None
 
 class Country(object):
     def __init__(self, name: str, cities: list):
@@ -21,8 +23,20 @@ class CountriesWrapper(object):
     endpoint = 'https://countriesnow.space/api/v0.1/countries'
 
     def get_countries(self):
-        json_resp = json.loads(requests.get(self.endpoint).text)
-        return [Country(name=country['country'], cities=country['cities']) for country in json_resp['data']]
+        """It gets all of the countries from countriesnow.space api. It only does the request once in order to reduce response time in the view level."""
+        global ALL_COUNTRIES
+        if ALL_COUNTRIES is None:
+            json_resp = json.loads(requests.get(self.endpoint).text)
+            ALL_COUNTRIES = [Country(name=country['country'], cities=country['cities']) for country in json_resp['data']]
+        return ALL_COUNTRIES
+
+    def get_country_cities(self, country_name: str):
+        """Get cities by country name"""
+        global ALL_COUNTRIES
+        if ALL_COUNTRIES is None:
+            json_resp = json.loads(requests.get(self.endpoint).text)
+            ALL_COUNTRIES = [Country(name=country['country'], cities=country['cities']) for country in json_resp['data']]
+        return [country.cities for country in ALL_COUNTRIES if country.name == country_name][0]
 
 
 class WeatherWrapper(object):
@@ -35,5 +49,8 @@ class WeatherWrapper(object):
             country=json_resp['sys']['country'],
             city_name=json_resp['name'],
             weather_main=json_resp['weather'][0]['main'],
-            weather_description=json_resp['weather'][0]['description']
+            weather_description=json_resp['weather'][0]['description'],
+            temp_min=round(float(json_resp['main']['temp_min']) - 273.15, 2),
+            temp_max=round(float(json_resp['main']['temp_max']) - 273.15, 2),
+            feels_like=round(float(json_resp['main']['feels_like']) - 273.15, 2),
         )

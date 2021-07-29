@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from ..forms import AddEditTaskForm
 from ..models import Task, TaskList
 from ..utils import staff_check
-
+from ..service import CountriesWrapper
 
 @login_required
 @user_passes_test(staff_check)
@@ -76,4 +76,5 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False) -> 
         "form": form,
         "tasks": tasks,
         "view_completed": view_completed,
+        "countries": CountriesWrapper().get_countries()
     })

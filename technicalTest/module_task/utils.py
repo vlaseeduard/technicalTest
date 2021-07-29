@@ -3,6 +3,7 @@
 from .models import Task
 from .defaults import defaults
 from . import task_logger
+from . service import CountriesWrapper
 
 def staff_check(user):
     """

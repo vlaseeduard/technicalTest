@@ -4,3 +4,5 @@ from ..views.list_detail import list_detail
 from ..views.del_list import del_list
 from ..views.task_detail import task_detail
 from ..views.toggle_done import toggle_done
+from ..views.get_country_cities import get_country_cities
+from ..views.get_weather import get_weather

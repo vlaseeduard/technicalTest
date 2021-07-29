@@ -19,5 +19,8 @@ urlpatterns = [
     path("<int:list_id>/<str:list_slug>/delete/", views.del_list, name="del_list"),
     path("task/<int:task_id>/", views.task_detail, name="task_detail"),
     path("toggle_done/<int:task_id>/", views.toggle_done, name="task_toggle_done"),
+    path("get_cities/<str:country_name>", views.get_country_cities, name="get_cities"),
+
+    path("get_weather/<str:city_name>", views.get_weather, name="get_weather")
 ]
 

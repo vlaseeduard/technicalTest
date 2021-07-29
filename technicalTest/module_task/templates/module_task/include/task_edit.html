@@ -4,7 +4,7 @@
     {% csrf_token %}
     <div class="mt-3">
         <div class="form-group">
-            <label for="id_title" name="title">Task</label>
+            <label for="id_title" >Task</label>
             <input type="text" class="form-control" id="id_title" name="title" required placeholder="Task title"
                    value="{% if form.title.value %}{{ form.title.value }}{% endif %}">
         </div>
@@ -21,7 +21,7 @@
         <div class="form-group">
             <label for="id_due_date">Due Date</label>
             <input type="date" class="form-control" id="id_due_date" name="due_date"
-                   value="{% if form.due_date.value %}{{ form.due_date.value|date:"Y-m-d" }}{% endif %}">
+                   value="{% if form.due_date.value %}{{ form.due_date.value|date:'Y-m-d' }}{% endif %}">
         </div>
 
         <div class="form-group">
@@ -45,7 +45,17 @@
         <input type="hidden" name="priority"
                value="{% if form.priority.value %}{{ form.priority.value }}{% else %}999{% endif %}" id="id_priority">
         <input type="hidden" name="task_list" value="{{ form.task_list.value }}" id="id_task_list">
-        <input type="hidden" name="completed" class="form-check-input" type="checkbox" checked="{%if task.completed%}checked{% endif %}" id="id_completed">
+        <input type="hidden" name="completed" class="form-check-input" checked="{%if task.completed%}checked{% endif %}" id="id_completed">
+
+        <div id="countries-selection">
+            <select id='country-selection' onchange="add_cities()">
+                <option>Select country</option>
+                {% for country in countries %}
+                    <option>{{ country.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div id="temp"></div>
 
         <p>
             <input type="submit" name="add_edit_task" value="Submit" class="btn btn-primary">
@@ -53,3 +63,111 @@
 
     </div>
 </form>
+
+
+<script>
+    function add_cities(){
+        if(document.getElementById('city-selection')){
+            document.getElementById('city-selection').remove();
+        }
+        const countryName = document.getElementById('country-selection').value;
+
+        let countriesList = do_action_request(`/task/get_cities/${countryName}`, 'GET', {}, '{{ csrf_token }}').cities;
+        let citiesOptions='';
+        for (let index = 0; index < countriesList.length; index ++){citiesOptions += `<option >${countriesList[index]}</option>`;}
+
+        document.getElementById('countries-selection').innerHTML += `
+        <select id="city-selection" onchange="get_weather()">
+            <option >Select city</option>
+            ${citiesOptions}
+        </select>
+        `
+        document.getElementById('country-selection').value = countryName;
+    }
+
+    function get_weather(){
+        const cityName = document.getElementById('city-selection').value;
+
+        let weather = do_action_request(`/task/get_weather/${cityName}`, 'POST', {}, '{{ csrf_token }}').weather;
+
+        if (weather === undefined){
+            document.getElementById('temp').innerHTML =`
+           <p>No data available for this city.</p>
+
+        `;
+        } else {
+            document.getElementById('temp').innerHTML =`
+           <table id="weather-table">
+               <tr><td>temp_max</td><td>${weather.temp_max}</td></tr>
+               <tr><td>temp_min</td><td>${weather.temp_min}</td></tr>
+               <tr><td>weather_description</td><td>${weather.weather_description}</td></tr>
+               <tr><td>weather_main</td><td>${weather.weather_main}</td></tr>
+            </table>
+
+        `;
+        }
+
+        document.getElementById('temp').style.backgroundColor = '#ffffff';
+
+        " Blue for “cold” or “rain”, Yellow-Orange for “warm” or\n" +
+        "“cloudy” and Red for “hot” or “sunny” (the product owner did not specify the exact parameters for temperature and colour)."
+
+        switch (weather.weather_main.toLowerCase()){
+            case 'cold' :
+                document.getElementById('temp').style.backgroundColor = '#e79673';
+                break;
+            case 'rain':
+                document.getElementById('temp').style.backgroundColor = '#e79673';
+                break;
+            case 'warm':
+                document.getElementById('temp').style.backgroundColor = 'red';
+                break;
+            case 'clouds':
+               document.getElementById('temp').style.backgroundColor = 'red';
+               break;
+            case 'hot':
+               document.getElementById('temp').style.backgroundColor = 'purple';
+               break;
+            case 'sunny':
+               document.getElementById('temp').style.backgroundColor = 'purple';
+               break;
+
+            default:
+                // code block
+
+        }
+
+
+    }
+
+
+    function do_action_request(endpoint, method, data, csrf_token){
+        /*
+        * @param {String} endpoint - The input id
+        * @param {String} method - http method used for ajax request
+        * @param {String} data - The data sent to the server.
+        * @param {String} csrf_token - csrf token
+        */
+        return $.ajax({
+                type: method,
+                data: data,
+                async: false,
+                cache: false,
+                dataType: 'json',
+                beforeSend: function(xhr){
+                    xhr.setRequestHeader("X-CSRFToken", csrf_token);
+                },
+                url: endpoint,
+                contentType: "application/json; charset=utf-8",
+                processData : false,
+                success: function(response) {
+                    console.log(response);
+                },
+                error: function(xhr, ajaxOptions, thrownError) {
+                    console.error(xhr.status + ": " + xhr.responseText);
+                }
+        }).responseJSON.data;
+
+    }
+
+</script>
