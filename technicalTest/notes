@@ -1,3 +1,6 @@
+### The project needs to have serveral groups inserted in db and 2-3 staff users.
+
+
 python manage.py makemigrations
 python manage.py migrate
 # load the groups
